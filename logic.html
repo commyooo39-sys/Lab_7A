@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <form id="task-form">
+        <input id="task-title" type="text" placeholder="somethingtodo">
+        <label>
+            <select id="prioLity">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="hight">Hight</option>
+            </select>
+
+
+
+        </label><br>
+        <label>
+            <input type="submit" value="Submit">
+        </label>
+    </form>
+    <ul id="list-task">
+
+    </ul>
+</body>
+<script>
+    const taskForm = document.getElementById('task-form')
+    const Title = document.getElementById('task-title')
+    const PrioLity = document.getElementById('prioLity')
+    const toggleBtn = document.getElementById('toggle')
+    const listTask = document.getElementById('list-task')
+    const saveTasks = () => {
+        localStorage.setItem('tasks', JSON.stringify(tasks))
+    }
+
+
+
+    const task = [
+        { id: 1, title: '', completed: false, priolity: '', },
+        { id: 2, title: '', completed: false, priolity: '', },
+        { id: 3, title: '', completed: false, priolity: '', }
+    ]
+
+    if (localStorage.getItem('tasks') === null) {
+        localStorage.setItem('tasks', JSON.stringify(task))
+
+    }
+
+    let tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
+
+
+    const addtask = () => {
+        const emptyTask = tasks.find(x => x.title === '') //method find หาตัวเเรกที่ตรงจามเงื่อนไข
+
+        if (Title.value === '') {
+            alert('กรุณากรอกข้อมูล')
+        }
+        if (emptyTask) {
+            emptyTask.title = Title.value.trim();
+            emptyTask.priolity = PrioLity.value;
+        } else {
+            const newtask = {
+                id: tasks.length + 1,
+                title: Title.value.trim(),
+                completed: false,
+                priolity: PrioLity.value
+            }
+            tasks.push(newtask)
+
+
+
+        }
+        console.log(`เพื่ม Title : ${Title.value.trim()}  Priority : ${PrioLity.value} เรียบร้อย`)
+        console.log(tasks)
+    }
+
+    const toggleTask = (id) => {
+        tasks = tasks.map(t =>
+            t.id === id ? { ...t, completed: !t.completed } : t ,
+        
+        )
+        saveTasks()
+        listTask.innerHTML = ''
+        renderTask()
+        console.log(`เปลี่ยนสถานะ Priolity ${tasks.find(t => t.id === id)?.title} เรียบร้อย`)
+        console.log(tasks.find(t => t.id === id))
+    }
+    const deleteTask = (id) => {
+        tasks = tasks.filter(t => t.id !== id)
+        saveTasks()
+        listTask.innerHTML = ''
+        renderTask()
+        console.log(tasks)
+        console.log(tasks.find(t => t.id === id) ? 'ยังไม่ลบ' : `task ถูกลบแล้ว`)
+    }
+
+    const renderTask = () => {
+        tasks.forEach((todos, index) => {
+            const li = document.createElement('li')
+            li.textContent = ` ID : ${index + 1}  Title :${todos.title}  Status : ${todos.completed ? 'pass' : 'false'} Priolity : ${todos.priolity}  `
+            const toggleBtn = document.createElement('button')
+            toggleBtn.textContent = 'Toggle'
+            toggleBtn.addEventListener('click', () => {
+                toggleTask(todos.id)
+            });
+            const deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.textContent = '❌';
+            deleteButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteTask(todos.id)
+            });
+
+
+            li.appendChild(toggleBtn)
+            li.appendChild(deleteButton);
+            listTask.appendChild(li)
+        });
+    }
+
+    taskForm.addEventListener('submit', (e) => {
+        e.preventDefault()
+        addtask()
+        saveTasks()
+        listTask.innerHTML = ''
+        renderTask()
+        Title.value = ''
+        PrioLity.value = 'low'
+    })
+
+    renderTask()
+
+
+
+</script>
+
+</html>
